@@ -1,0 +1,4 @@
+Lưu ý: Sử dụng trình duyện Firefox hoặc Microsoft Edge để chạy. Tránh sử dụng trình duyệt xài nhân Chronium (Google Chrome, Cốc Cốc, ...)
+       vì cần phải setup localhost
+Hướng dẫn chơi Mario
+1. Dùng phím W để nhảy; A,D để di chuyển trái phải.
