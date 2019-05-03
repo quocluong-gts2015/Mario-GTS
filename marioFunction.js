@@ -1,236 +1,190 @@
-//------------timecd-----------
-var timecd;
-var opar_Item,oHoa,getId;
-//-------------nhanvat-mario------------------------
-var mario,obj_follow;
-var key_left,key_right,key_jump,key_down,key_attack,oFireball;
-var canjump= false;
-var dir = 1,grv = 1;
-var hspd = 0, vspd = 0, giatoc = 0;
-var marioState; var Died;
-//-----------------pha-huy-trai+duoi----------
-var oDestroys,oDesL,oDesD;
-//---------------------gach----------
-var opar_Cucgach,oCucgach,opar_Cucgach01,oCucgach01;
-var getID=0;
-var ofallDown,ofall;
-//-----------------quaivat---------
-var omonLife;
-var opar_Namdoc,oNamdoc;
-var opar_Conrua,oConrua,chaynhanh;
-//--------------coins------------
-var opar_Coins,oCoins,rem;
-//----------game-state--------------------
-var gameOver  = false;
-
-function DestroyObject(objColli,objDestroy){objDestroy.remove();}
-function scr_getItem(objColli,objItem){
-	if(objItem.getId == 1)
-	{
-		mario.canShoot = 1;
-	}
-	objItem.remove();}
-
-function x_Object(objColli,obj_x)/*----------------------------quaivat<0>.colition.oCucgach<1>----------------------------*/{
-	var Left_0 = objColli.position.x-16;
-	var Right_0 = objColli.position.x+16;
-	var Down_0 = objColli.position.y+16;
-	
-	var Left_1 = obj_x.position.x-16;
-	var Right_1 = obj_x.position.x+16;
-	var Up_1 = obj_x.position.y-16;
-	var Down_1 = obj_x.position.y+16;
-	if(objColli.getId ==0)//-------------------0.namdoc
-	{
-		if(Down_0 == Up_1 && objColli.position.x < Right_1 && objColli.position.x > Left_1)
-		{objColli.velocity.y=0;}
-		if(Left_0+objColli.dir < Right_1 || Left_1 > Right_0+objColli.dir )
-		{
-			objColli.dir=objColli.dir * -1;
-			if(objColli.chaynhanh == 0)
-			{
-				objColli.velocity.x = objColli.dir;
-				objColli.position.x+=objColli.dir;
-			}
-			else
-			{
-				objColli.velocity.x = objColli.dir*3;
-				objColli.position.x+=objColli.dir*3;
-					
-			}
-		}
-	}
-	else if(objColli.getId ==1)//-------------1.fireball--------------
-	{
-		if(Down_0-8 == Up_1 || Down_0 - 7 == Up_1)
-		{objColli.position.y -= 10;}
-		if((Left_0+8 == Right_1 || Left_1== Right_0-8) && objColli.position.y>Up_1 && objColli.position.y <Down_1 )
-		{
-			objColli.remove();
-		}
-	}	
+function scr_Destroy(oA,oB){oB.remove();}
+function scr_Win(oA,oB){
+	gameOver = true; gameWin = 1;
 }
-function scr_fallDown(objColli,obj_x){objColli.position.y+=2;}//--------------quaivat.collition.fall----------------------------
-function scr_fallUp(objColli,obj_x){
-	objColli.velocity.y=-2;
-	if(objColli.position.y+16<obj_x.position.y-32) objColli.remove();
+function scr_destroyAll(oA,oB){oB.remove();oA.remove();}
+function scr_getItem(oA,oB)
+{
+	oA.canShoot = 1;
+	oA.timeDuring = 200;
+	oB.remove();
+}
+function scr_fireBall(oA,oB)/*----------------------------fireBall<0>.colition.oCucgach<1>----------------------------*/
+{
+	if(oA.position.y+8 == oB.position.y-16)
+	{	
+		oA.position.y-=10;
+	}
+	if((oA.position.x+8 == oB.position.x-16 || oA.position.x-8 == oB.position.x+16) && oA.position.y < oB.position.y+16 && oA.position.y > oB.position.y-16)
+	{
+		console.log('aaa');
+		oA.remove();
+	}
 }
 
-function Vacham_xy(objColli,obj_x)/*----------------------------mario<0>.colition.oCucgach<1>----------------------------*/{
-	var Down_0 = objColli.position.y+16;
-	var Up_0 = objColli.position.y-16;
-	var Left_0 = objColli.position.x-16;
-	var Right_0 = objColli.position.x+16;
-	var Left_1 = obj_x.position.x-16;
-	var Right_1 = obj_x.position.x+16;
-	var Up_1 = obj_x.position.y-16;
-	var Down_1 = obj_x.position.y+16;
-	if((Down_0 == Up_1||Down_0-1 == Up_1) && objColli.position.y<obj_x.position.y && (Left_0 != Right_1 || Right_0 != Left_1))
+function scr_MonsColli(oA,oB)/*----------------------------quaivat<0>.colition.oCucgach<1>----------------------------*/
+{
+	//----------------------------------------quaivat----------------------------
+	if(oA.getName == 'oNamdoc')
 	{
-		vspd = 0;
-		objColli.velocity.y=0;
-		canjump = true;
 		
-	}
-	if((Left_0 == Right_1|| Right_0 == Left_1) && (Down_0-1 != Up_1 && Down_0 != Up_1))
-	{
-		hspd = 0;giatoc=0;
-		objColli.velocity.x=0;
-		//canjump = false;
-		//console.log(Down_0);
-	
-	}
-	//if(Down_0 != Up_1 ){canjump = false;console.log('vspdff');}
-	if(Up_0 == Down_1 && objColli.position.x <= Right_1 && objColli.position.x >= Left_1 )
-	{
-		if(obj_x.getID >0 )//-------------getcoinsup----------
-		{
-			vspd=0;
-			canjump = false;
-			objColli.velocity.y+=2;
-			objColli.position.y+=2;
-			obj_x.getID--;
-			oCoins = createSprite(obj_x.position.x, obj_x.position.y-16, 32, 32);
-			//oCoins.rem = 600;
-			//oCoins.velocity.y=-1;
-			//scr_timecd(oCoins,2);
-			
+		if(oA.position.y+16 == oB.position.y-16)
+		{	
+			oA.velocity.y=0;
+			oA.velocity.x = oA.dir*2;
 		}
-		else if(obj_x.getID ==-1)//-------------gethoa
+		if((oA.position.x+16 == oB.position.x-16 || oA.position.x-16 == oB.position.x+16) && oA.position.y == oB.position.y)
 		{
-			vspd=0;
-			canjump = false;
-			objColli.velocity.y+=2;
-			objColli.position.y+=2;
-			oHoa = createSprite(obj_x.position.x,obj_x.position.y-32,16,16);
-			oHoa.setCollider('rectangle');oHoa.addImage(loadImage('image/oHoa.png'));oHoa.getId = 1;
-			oHoa.scale = 2;oHoa.debug=!mouseIsPressed;
-			opar_Item.add(oHoa);
-			obj_x.getID = 0;
-		}
-		else {
-			vspd=0;
-			canjump = false;
-			objColli.velocity.y+=2;
-			objColli.position.y+=2;
-			//console.log('obj_x.getID');
-			console.log('a');
+			oA.dir = oA.dir * -1;
+			oA.velocity.x = oA.dir*2;
 		}
 	}
 }
-function Vacham_mons(objColli,obj_x)/*----------------------------mario<0>.colition.quaivat<1>----------------------------*/{
-	var Left_0 = objColli.position.x-16;
-	var Right_0 = objColli.position.x+16;
-	var Up_0 = objColli.position.y-16;
-	var Down_0 = objColli.position.y+16;
-	var Left_1 = obj_x.position.x-16;
-	var Right_1 = obj_x.position.x+16;
-	var Up_1 = obj_x.position.y-16;
-	var Down_1 = obj_x.position.y+16;
-	if(Down_0 == Up_1)// && objColli.position.x < Right_1 && objColli.position.x > Left_1)
+function scr_Invi(oA,oB)/*----------------------------quaivat<0>.colition.oCucgach<1>----------------------------*/
+{
+	//----------------------------------------quaivat----------------------------
+	if((oA.position.x+16 == oB.position.x-16 || oA.position.x-16 == oB.position.x+16) && oA.position.y == oB.position.y)
 	{
-		if(obj_x.omonLife == 1)
-		{
-			vspd =-8;
-			obj_x.remove();
-		}
-		else if(obj_x.omonLife == 2)
-		{
-			vspd =-8;
-			obj_x.velocity.x += obj_x.dir*3;
-			obj_x.chaynhanh = 1;
-			obj_x.omonLife--;
-		}
-		else
-		{
-			vspd =-8;
-			obj_x.omonLife--;obj_x.velocity.x = 0;
-
-		}
+		oA.dir = oA.dir * -1;
+		oA.velocity.x = oA.dir*2;
 	}
-	if(Left_0 == Right_1 || Left_1 == Right_0 || Down_1 == Up_0)
+}
+//--------------------------vacham-----------------------------
+function Vacham_xy(oA,oB)
+{
+	if(oA.getName == 'mario')//----------------------------mario----------------------------
+	{
+		if(oB.getName == 'none')
+		{
+			if((oA.position.y+16 == oB.position.y-16 || oA.position.y+15 == oB.position.y-16)&& oA.position.x-16-floor(oA.hspd) != oB.position.x+16 && oA.position.x+16-floor(oA.hspd) != oB.position.x-16)// && oA.position.x-16 != oB.position.x+16 && oA.position.x+16 != oB.position.x-16)
+			{
+				oA.vspd = 0;
+				oA.velocity.y=0;
+				oA.canjump = true;
+			}
+			if((oA.position.x-32-floor(oA.hspd) == oB.position.x || oA.position.x+32-floor(oA.hspd) == oB.position.x) && oA.position.y+16 != oB.position.y-16 && oA.position.y+15 != oB.position.y-16 && oA.position.y!= oB.position.y)
+			{
+				oA.canjump = false;
+				oA.hspd = 0;giatoc=0;
+				oA.velocity.x=0;
+			}
+		}
+			if(oA.position.y-16 == oB.position.y+16)// && oA.position.x <= oB.position.x+16 && oA.position.x >= oB.position.x-16 )
+			{
+				if(oB.getName == 'getFlower')//-------------getflower------------------
+				{
+					console.log('aa');
+					oA.vspd=0;
+					oA.canjump = false;
+					oA.velocity.y+=2;oA.position.y+=2;
+					oFlower = createSprite(oB.position.x,oB.position.y-32,8,8);
+					oFlower.setCollider('rectangle');oFlower.addImage(loadImage('image/oFlower.png'));oFlower.getName = 1;
+					oFlower.scale = 2;
+					opar_Item.add(oFlower);
+					oB.getName = 'none';
+					oB.addImage(loadImage('image/onoCoins.png'));
+				}
+				else if(oB.getName == 'none')
+				{
+					mario.vspd=0;
+					mario.canjump = false;
+					oA.velocity.y+=2;
+					oA.position.y+=2;	
+				}
+			}
+	}
+}
+
+function scr_Vachammons(oA,oB)/*----------------------------mario<0>.colition.quaivat<1>----------------------------*/
+{
+	if(oA.position.y+16 == oB.position.y-16)// && oA.position.x < Right_1 && oA.position.x > Left_1)
+	{
+		stompMusic.play();
+		oA.vspd =-8;
+		oB.remove();
+	}
+	if(oA.position.x-16 == oB.position.x+16 || oA.position.x+16 == oB.position.x-16 || oA.position.y-16 == oB.position.y+16)
 	{
 		gameOver = true;
 	}
 }
-function drawMap(){
-	var dem = 0;
-	var docao = height+16;
-	for(var ai=0;ai<mapx.length;ai++)
+function drawMap()
+{
+	oDestL = createSprite(-16,height/2,10,600);
+	oDestroys.add(oDestL);
+	var dem = 0;var cotx = 0;
+	var docao = height-16;
+	for(var ai=1;ai<=mapx.length;ai++)
 	{
-		var het = ai%90;
-		if(het==0){docao-=32;}
+		var het = ai%14;
+		if(het==0){cotx++;}
 		if(mapx[ai]==1)
 		{
-			oCucgach = createSprite(16+32*het,height-docao,32,32);
-			oCucgach.setCollider('rectangle');
-			oCucgach.addImage(loadImage('image/oCucgach.png'));
-			oCucgach.getID = 0;
-			//oCucgach.debug=!mouseIsPressed; 
+			oCucgach = createSprite(16+cotx*32,height-32*het,32,32);
+			oCucgach.setCollider('rectangle');oCucgach.addImage(loadImage('image/oCucgach.png'));
+			oCucgach.getName = 'none';
 			opar_Cucgach.add(oCucgach);
 		}
 		else if(mapx[ai]==2)
 		{
-			oNamdoc = createSprite(16+32*het,height-docao,32,32);
+			oNamdoc = createSprite(16+cotx*32,height-32*het,32,32);
 			oNamdoc.setCollider('rectangle');
 			oNamdoc.addAnimation("quaiLR","image/eNamL.png","image/eNamR.png");
 			oNamdoc.dir = 1;
-			oNamdoc.velocity.y += 1;
-			oNamdoc.getId = 0;
-			oNamdoc.omonLife = 1;
-			oNamdoc.chaynhanh = 0;
+			oNamdoc.velocity.y += 4;
+			oNamdoc.velocity.x = oNamdoc.dir;
+			oNamdoc.getName = 'oNamdoc';
 			opar_Namdoc.add(oNamdoc);
 		}
-		else if(mapx[ai] == -1)
+		else if(mapx[ai]==4)
 		{
-			ofall = createSprite(16+32*het,height-docao,32,32);
-			ofall.setCollider('rectangle');
-			ofallDown.add(ofall);
+			oCucgach = createSprite(16+cotx*32,height-32*het,32,32);
+			oCucgach.setCollider('rectangle');oCucgach.addImage(loadImage('image/oCucgach0.png'));
+			oCucgach.getName = 'none';
+			opar_Cucgach.add(oCucgach);
 		}
-		else if(mapx[ai] == 3)//-----------------------conrua---------------
+		else if(mapx[ai] == 5)
 		{
-			oCucgach01 = createSprite(16+32*het,height-docao,32,32);
-			oCucgach01.setCollider('rectangle');
-			oCucgach01.addImage(loadImage('image/block03.png'));
-			oCucgach01.getID = 3;
-			opar_Cucgach01.add(oCucgach01);
+			oInvi = createSprite(16+cotx*32,height-32*het,32,32);
+			oInvi.setCollider('rectangle');
+			oInvi.addImage(loadImage('image/oInvi.png'));
+			opar_Invi.add(oInvi);
 		}
-		else if(mapx[ai]==5)
+		else if(mapx[ai]==6)
 		{
-			oCucgach = createSprite(16+32*het,height-docao,32,32);
-			oCucgach.setCollider('rectangle');
-			oCucgach.addImage(loadImage('image/oCucgach.png'));
-			oCucgach.getID = 5;
+			oMay = createSprite(16+cotx*32,height-32*het,0,0);
+			oMay.addImage(loadImage('image/oCucgach2.png'));
+		}
+		else if(mapx[ai]==8)
+		{
+			oCucgach = createSprite(16+cotx*32,height-32*het,32,32);
+			oCucgach.setCollider('rectangle');oCucgach.addImage(loadImage('image/onoCoins.png'));
+			oCucgach.getName = 'none';
 			opar_Cucgach.add(oCucgach);
 		}
 		else if(mapx[ai]==10)
 		{
-			oCucgach = createSprite(16+32*het,height-docao,32,32);
+			oCucgach = createSprite(16+cotx*32,height-32*het,32,32);
 			oCucgach.setCollider('rectangle');
-			oCucgach.addImage(loadImage('image/oCucgach.png'));
-			oCucgach.getID = -1;
+			oCucgach.addImage(loadImage('image/ogetCoins.png'));
+			oCucgach.getName = 'getFlower';
 			opar_Cucgach.add(oCucgach);
 		}
-		
+		else if(mapx[ai]==15)
+		{
+			oCo = createSprite(16+cotx*32,height-32*het,32,32);
+			oCo.setCollider('rectangle');
+			oCo.addImage(loadImage('image/co1.png'));
+			opar_Co.add(oCo);
+		}
+		else if(mapx[ai]==16)
+		{
+			oCo = createSprite(16+cotx*32,height-32*het,32,32);
+			oCo.setCollider('rectangle');
+			oCo.addImage(loadImage('image/co0.png'));
+			opar_Co.add(oCo);
+		}
 	}
+		obj_follow = createSprite(480,240,8,8);
+		obj_follow.addImage(loadImage('image/oInvi.png'));
 }
